@@ -38,6 +38,8 @@ The repository is modularly structured into 3 core SQL stages representing a rea
   * **Data Imputation via Self-Join:** Written a relational `Self-Join` query that automatically maps companies with blank industries (`industry IS NULL`) to matching entries of the same company that contain valid industry data, maximizing data completeness without manual input.
   * **Structural Pruning:** Purged dead records where both essential financial indicators (`total_laid_off` and `percentage_laid_off`) were concurrently missing.
 
+---
+
 ## 👤 Author
 
 ### Zaid Shatat
