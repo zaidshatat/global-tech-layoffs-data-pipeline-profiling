@@ -1,4 +1,4 @@
-# 🚀 Global Tech Layoffs Analytics: End-to-End T-SQL Pipeline
+# Global Tech Layoffs Analytics: End-to-End T-SQL Pipeline
 
 ## 📝 1. Short Description
 An end-to-end data engineering and analytics pipeline built with MS SQL Server (T-SQL) to ingest, clean, and analyze global tech layoff events (2020–2023). The project maps out data profiling, removes structural duplicates, standardizes messy entries, and materializes complex multi-axis analytical queries into BI-ready SQL Views.
