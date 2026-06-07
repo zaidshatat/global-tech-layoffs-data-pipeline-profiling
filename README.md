@@ -62,3 +62,9 @@ The pipeline is engineered modularly across 7 independent script phases to enfor
 * **Production-Grade Data Integrity:** Transformed a highly volatile, unverified raw file into a mathematically sound, standardized relational database schema completely free of structural duplicates.
 * **Decoupled Architecture:** By abstracting all complex windowing calculations, time-series parsing, and self-joins inside optimized **SQL Views**, the operational overhead on visualization engines is reduced to a minimum.
 * **BI Dashboard Acceleration:** Downstream BI applications (Power BI/Tableau) can connect directly to the views, allowing for sub-second report rendering, seamless filtering, and zero localized data manipulation.
+
+---
+
+## 👤 Author
+
+**Zaid Shatat**
