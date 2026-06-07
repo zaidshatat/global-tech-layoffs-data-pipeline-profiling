@@ -1,59 +1,64 @@
-# 📊 Global Tech Layoffs: End-to-End SQL Data Ingestion & Cleaning Pipeline
+# 🚀 Global Tech Layoffs Analytics: End-to-End T-SQL Pipeline
 
-## 📋 Project Overview
-This project engineering a production-ready data pipeline using **MS SQL Server** to ingest, profile, clean, and standardize a messy, un-structured global tech layoffs dataset. The pipeline systematically handles data type conversion defense, eliminates redundant cross-row duplication, resolves formatting anomalies, and utilizes advanced database concepts like Self-Joins and Window Functions to construct an enterprise-grade data asset.
-
-## 🛠️ Tech Stack & SQL Architecture
-* **Database Engine:** Microsoft SQL Server (MS SQL Server)
-* **SQL Dialect:** T-SQL (Transact-SQL)
-* **Advanced Mechanisms Used:** * Window Functions (`ROW_NUMBER()` with `PARTITION BY`)
-  * Defensive Type Casting (`TRY_CAST`, `TRY_CONVERT`)
-  * Common Table Expressions (CTEs)
-  * Relational Self-Joins for Data Imputation
-  * Schema Modifications (`ALTER TABLE`)
+## 📝 1. Short Description
+An end-to-end data engineering and analytics pipeline built with MS SQL Server (T-SQL) to ingest, clean, and analyze global tech layoff events (2020–2023). The project maps out data profiling, removes structural duplicates, standardizes messy entries, and materializes complex multi-axis analytical queries into BI-ready SQL Views.
 
 ---
 
-## 🏗️ Pipeline Structure & Logic
+## 📖 2. Full Description
+This portfolio project demonstrates an advanced implementation of relational database development and exploratory data analysis using **Microsoft SQL Server (T-SQL)**. The pipeline ingests raw, unpolished records containing over 2,300 global tech layoff events across 60 countries and 32 industries. 
 
-The repository is modularly structured into 3 core SQL stages representing a real-world data lifecycle:
-
-### 1️⃣ Data Ingestion & Schema Defense (`01_data_ingestion.sql`)
-* **The Goal:** Build a resilient table structure to handle incoming data safely.
-* **The Logic:** Enforced a targeted data type schema to block raw corrupted text entries. Implemented defensive type casting using `TRY_CAST` for numeric metrics (`total_laid_off`, `funds_raised_millions`) and date records. This guarantees that any corrupt string values are gracefully converted into `NULL` instead of crashing the database during mass ingestion.
-
-### 2️⃣ Exploratory Data Analysis & Profiling (`02_exploratory_data_analysis.sql`)
-* **The Goal:** Inspect data completeness, null density, and categorical volatility.
-* **The Logic:** * Audited column constraints through system schemas (`INFORMATION_SCHEMA.COLUMNS`).
-  * Calculated exact missing value volumes using multi-column conditional aggregation: `SUM(CASE WHEN Column IS NULL THEN 1 ELSE 0 END)`.
-  * Merged multi-column descriptive statistics (Count, Missing, Mean, Min, Max) into a single optimized view using `UNION ALL`.
-
-### 3️⃣ Advanced Data Cleaning & Imputation (`03_data_cleaning_pipeline.sql`)
-* **The Goal:** Eliminate structural errors, purge duplicates, and fix anomalies.
-* **The Logic:**
-  * **Deduplication:** Isolated and permanently deleted redundant records matching across all 9 dimensions by building a `duplicateCTE` powered by `ROW_NUMBER() OVER(PARTITION BY...)`.
-  * **Text Standardization:** Applied `TRIM` functions to clear whitespace contamination from company names and locations.
-  * **Categorical Normalization:** Consolidated structural deviations (e.g., merging `Crypto%` variations, shifting `Fin-Tech` into standard `Finance`, and handling literal `'NULL'` strings).
-  * **Geographical Corrections:** Restructured country string names containing trailing syntax dots (e.g., `United States.`) using dynamic string slicing: `TRIM(LEFT(country, LEN(country) - 1))`.
-  * **Data Imputation via Self-Join:** Written a relational `Self-Join` query that automatically maps companies with blank industries (`industry IS NULL`) to matching entries of the same company that contain valid industry data, maximizing data completeness without manual input.
-  * **Structural Pruning:** Purged dead records where both essential financial indicators (`total_laid_off` and `percentage_laid_off`) were concurrently missing.
+The pipeline transitions systematically through distinct architectural layers: from safe schema mapping (`TRY_CAST` ingestion) to granular data profiling, followed by a rigorous 7-stage data scrubbing pipeline (deduplication via Window functions, text standardization, and self-join data imputation). Post-cleaning, the dataset is subjected to robust analytical reporting—including rolling time-series trend tracking and segmented peer-group ranking. The final structural layer abstracts these complex analytics into optimized database `Views`, creating a clean, scalable data-access layer ready for immediate integration with business intelligence tools like Power BI or Tableau.
 
 ---
 
-## 👤 Author
+## 🔍 3. The Problem
+During macroeconomic shifts, global tech layoff data serves as a vital indicator of market health. However, real-world raw datasets are highly fragmented and unreliable. In this project, the initial staging environment revealed severe data anomalies:
+* **Redundancy:** Identical scraping/data-entry errors resulted in exact multi-row duplicates.
+* **Inconsistent Categorization:** Text entries were corrupted with trailing spaces, and semantic synonyms were duplicated (e.g., `Crypto`, `CryptoCurrency`, and `Crypto Currency` co-existing as separate industries).
+* **Missing Structural Dimensions:** Crucial fields like `industry` were left blank (`NULL`) even when previous records for the same company explicitly contained that information.
+* **Data Type Corruption:** Dates and numerical values were loaded as raw strings, preventing chronological ordering or statistical mathematical aggregations.
 
-### Zaid Shatat
+Without building a robust, repeatable programmatic cleaning layer, any visualization or business report derived from this data would produce fundamentally flawed metrics and distorted operational trends.
 
 ---
 
-## 📂 Repository Directory
-```text
-SQL-Data-Cleaning-Project/
-├── data/
-│   └── layoffs.csv                             # Raw unstructured dataset
-└── scripts/
-    ├── 01_data_ingestion.sql                   # Ingestion & type casting defense
-    ├── 02_exploratory_data_analysis.sql        # Data profiling & null metrics
-    └── 03_data_cleaning_pipeline.sql           # Heavy transformation & cleaning logic
+## ⚙️ 4. Process & Methodology (File Breakdown)
 
+The pipeline is engineered modularly across 7 independent script phases to enforce clean execution boundaries and maintainable database code.
 
+### 📁 01_data_ingestion.sql
+* **Function & Logic:** Establishes the core target table structure (`dbo.layoffs_clean`) with strict relational data types. It populates the table by selecting from raw staging data using `TRY_CAST` wrappers around all volatile text-to-numeric and text-to-date mappings. This architectural safeguard ensures that malformed data records convert smoothly to `NULL` indicators rather than throwing catastrophic execution exceptions that halt the ingestion process.
+
+### 📁 02_exploratory_data_analysis.sql
+* **Function & Logic:** Executes initial structural data profiling and system health checks on the newly ingested data layer. It targets the metadata layer using `INFORMATION_SCHEMA.COLUMNS` to validate precise field configurations. Additionally, it aggregates explicit Boolean checks via `CASE WHEN` clauses to map out the exact density and distribution of missing values (`NULL` counts) across every attribute, identifying critical cleanup frontiers.
+
+### 📁 03_data_cleaning_pipeline.sql
+* **Function & Logic:** The execution core of the ETL transformation engine. It carries out a sequential cleansing workflow: removes exact duplicates using a Common Table Expression (CTE) and `ROW_NUMBER() OVER (PARTITION BY...)`, strips trailing/leading whitespaces via `TRIM()`, consolidates fragmented naming variants using logical branching, and executes an optimized **Self-Join** to dynamically impute missing `industry` properties by copying known dimensions from historical company rows.
+
+### 📁 04_eda_volume_analysis.sql
+* **Function & Logic:** Handles macroeconomic mass and volume calculations across structural dimensions. It applies robust multi-column group-by aggregations to calculate absolute layoffs (`SUM`) alongside corporate funding metrics (`AVG`). This process effectively isolates the top 10 individual corporate entities driving down-sizing numbers and lists the most heavily impacted industrial sectors globally.
+
+### 📁 05_eda_time_series_analysis.sql
+* **Function & Logic:** Conducts advanced chronological pattern evaluation and historical timeline mapping. It breaks down raw timeline events into granular year-and-month intervals to monitor monthly volatility. Inside a tracking CTE, it implements an advanced analytical window function (`SUM() OVER (ORDER BY...)`) to compute a continuous, cumulative monthly **Rolling Total** of layoffs, isolating macro-economic contraction triggers over time.
+
+### 📁 06_eda_segmentation_ranking.sql
+* **Function & Logic:** Performs localized market segmentation and corporate peer-group benchmarking. Rather than evaluating companies globally, it utilizes an advanced `DENSE_RANK() OVER(PARTITION BY industry ORDER BY...)` window function inside a filtering CTE. This structure partitions the global tech market by industry sector, ranking and extracting the top 3 laying-off entities strictly within their own specific domain.
+
+### 📁 07_create_analytical_views.sql
+* **Function & Logic:** Builds the formal production reporting layer (Data Mart/Access Layer). It encapsulates all advanced EDA logic from scripts 04, 05, and 06 into permanent database `Views` (`dbo.v_*`). By abstracting multi-layered CTEs, joins, and window definitions behind a clean view interface, it provides downstream BI dashboards with instantaneous, high-performance query points without forcing the dashboard to process raw calculations.
+
+---
+
+## 📊 5. Insights & Results
+* **The Scale of Impact:** Highly capitalized entities were not immune; the analysis explicitly reveals a direct correlation between massive funding rounds (`funds_raised_millions`) and high-volume layoff actions during contraction cycles.
+* **Sector Vulnerability:** Consumer-facing and Retail sectors experienced the most volatile down-sizing spikes, outstripping deep-tech or enterprise-software fields in absolute employee numbers.
+* **Temporal Velocity:** The rolling totals clearly illustrate specific inflection months where layoff velocity accelerated exponentially, providing sharp insights into global market correction windows.
+* **Intra-Industry Leaders:** The dense ranking isolated dominant market players within niche categories, showing that even smaller sub-sectors suffered from top-heavy layoff concentrations.
+
+---
+
+## 🏆 6. Outcome & Impact
+* **Production-Grade Data Integrity:** Transformed a highly volatile, unverified raw file into a mathematically sound, standardized relational database schema completely free of structural duplicates.
+* **Decoupled Architecture:** By abstracting all complex windowing calculations, time-series parsing, and self-joins inside optimized **SQL Views**, the operational overhead on visualization engines is reduced to a minimum.
+* **BI Dashboard Acceleration:** Downstream BI applications (Power BI/Tableau) can connect directly to the views, allowing for sub-second report rendering, seamless filtering, and zero localized data manipulation.
